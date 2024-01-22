@@ -14,7 +14,7 @@ const userSchema = new Schema (
         mobileNumber:{type:Number , required:true , unique:true},
         role:{type:String , enum:[systemRoles.USER,systemRoles.COMPANY_HR,systemRoles.ADMIN] , default:systemRoles.USER },
         status:{type:String ,enum:[userStatus.OFFLINE , userStatus.ONLINE] ,default:userStatus.OFFLINE},
-        OTP:{type:String}
+        OTP:{type:Number}
     },
     {timestamps:true}
 )

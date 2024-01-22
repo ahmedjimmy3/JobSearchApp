@@ -3,6 +3,7 @@ import ApplicationModel from '../../../db/models/application.model.js'
 import JobModel from '../../../db/models/job.model.js'
 import moment from "moment"
 import excel from 'exceljs'
+import generateUniqueString from "../../utils/generateUniqueString.js"
 
 export const addCompany = async(req,res,next)=>{
     // get data
@@ -170,7 +171,8 @@ export const collectAllApplicationsForCompany=async(req,res,next)=>{
         })
     })
     // save excel file
-    const fileName = 'applications-for-specific-company-in-specific-day.xlsx'
+    const name = generateUniqueString()
+    const fileName = `applications-for-specific-company-in-specific-day-${name}.xlsx`
     workBook.xlsx.writeFile(fileName)
     .then(console.log('Done'))
     .catch(err =>console.log(err.message))

@@ -9,10 +9,6 @@ import moment from 'moment'
 export const signUp = async(req,res,next)=>{
     // get data from body
     const {email,lastName,firstName,password,recoveryEmail,DOB,mobileNumber,role} = req.body
-    // check all fields are entered
-    if(!firstName||!lastName||!email||!password||!recoveryEmail||!DOB||!mobileNumber){
-        return next(new Error('All fields are required please..' , {cause:400}))
-    }
     //check if email or mobileNumber already used before 
     const checkValidEmailAndMobileNumber = await UserModel.findOne({
         $or:[
@@ -108,9 +104,14 @@ export const updateAccount = async(req,res,next)=>{
             return next(new Error('This mobileNumber is already used',{cause:409}))
         }
     }
+    let formatDOB
+    if(DOB){
+        const DOBmoment = moment(DOB , 'YYYY-M-D')
+        formatDOB = DOBmoment.format('YYYY-M-D')
+    }
     // update data
     const updatedData = await UserModel.findByIdAndUpdate({_id},{
-            email , mobileNumber , recoveryEmail , DOB , lastName , firstName 
+            email , mobileNumber , recoveryEmail , DOB:formatDOB , lastName , firstName 
         } , {new:true}
     )
     if(!updatedData){
