@@ -29,5 +29,15 @@ router.get('/searchCompany',
     asyncWrapper(auth(companyRoutesRoles.GENERAL_USAGE_COMPANY_HR)),
     asyncWrapper(companyController.searchForCompany)
 )
+router.get('/applications/:companyId/:jobId',
+    asyncWrapper(auth(companyRoutesRoles.GENERAL_USAGE_COMPANY_HR)),
+    asyncWrapper(checkCompanyOwner()),
+    asyncWrapper(companyController.allApplicationsForJob)
+)
+router.get('/excel/:companyId',
+    asyncWrapper(auth(companyRoutesRoles.GENERAL_USAGE_COMPANY_HR)),
+    asyncWrapper(checkCompanyOwner()),
+    asyncWrapper(companyController.collectAllApplicationsForCompany)
+)
 
 export default router

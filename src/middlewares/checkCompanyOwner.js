@@ -1,7 +1,9 @@
 import CompanyModel from "../../db/models/company.model.js"
+import JobModel from "../../db/models/job.model.js"
 
 const checkCompanyOwner = ()=>{
     return async(req,res,next)=>{
+        const {jobId} = req.params
         const {_id} = req.authUser
         const {companyId} = req.params
         const companyFound = await CompanyModel.findById(companyId)
@@ -9,9 +11,14 @@ const checkCompanyOwner = ()=>{
             return next(new Error('This company not found',{cause:404}))
         }
         if(_id.toString() != companyFound.companyHR.toString()){
-            console.log(_id)
-            console.log(companyFound.companyHR)
-            return next(new Error('You can not make update in this company', {cause:401}))
+            return next(new Error('You can not access this company', {cause:401}))
+        }
+        if(jobId){
+            const job = await JobModel.findById(jobId)
+            if(!job){ return next(new Error('This job not found',{cause:404}))}
+            if(companyFound._id.toString() != job.companyId.toString()){
+                return next(new Error('You are not authorized to access this job applications!!',{cause:401}))
+            }
         }
         next()
     }

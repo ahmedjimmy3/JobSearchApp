@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import userStatus from '../../utils/user.status.js'
 import generateUniqueString from '../../utils/generateUniqueString.js'
+import moment from 'moment'
 
 
 export const signUp = async(req,res,next)=>{
@@ -26,9 +27,12 @@ export const signUp = async(req,res,next)=>{
     const username = firstName.toLowerCase()+lastName.toLowerCase() 
     //hash password
     const hashedPassword = bcrypt.hashSync(password , +process.env.SAULT_ROUNDS)
+    // apply format of DOB
+    const dobMoment = moment(DOB,'YYYY-M-D')
+    const formatDob = dobMoment.format('YYYY-M-D')
     // create new user in db
     const newUser = await UserModel.create({
-        firstName,lastName,email,password:hashedPassword,recoveryEmail,DOB,mobileNumber,username,role
+        firstName,lastName,email,password:hashedPassword,recoveryEmail,DOB:formatDob,mobileNumber,username,role
     })
     //check if creation failed
     if(!newUser){
