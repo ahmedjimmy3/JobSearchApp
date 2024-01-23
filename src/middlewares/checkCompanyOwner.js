@@ -20,6 +20,7 @@ const checkCompanyOwner = ()=>{
                 return next(new Error('You are not authorized to access this job applications!!',{cause:401}))
             }
         }
+        req.thisCompany = companyFound
         next()
     }
 }

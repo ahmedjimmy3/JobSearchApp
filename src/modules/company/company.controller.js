@@ -8,11 +8,7 @@ import generateUniqueString from "../../utils/generateUniqueString.js"
 export const addCompany = async(req,res,next)=>{
     // get data
     const {_id} = req.authUser
-    const {companyEmail,numberOfEmployee,address,industry,description,companyName} = req.body
-    // check if one of the required data not entered
-    if(!companyEmail||!numberOfEmployee||!address||!industry||!description||!companyName){
-        return next(new Error('All fields are required',{cause:400}))
-    }
+    const {companyEmail,numberOfEmployeeFrom,numberOfEmployeeTo,address,industry,description,companyName} = req.body
     // check companyName and companyEmail is not assigned before
     const checkDuplicateCompanyName = await CompanyModel.findOne({companyName})
     if(checkDuplicateCompanyName){
@@ -23,13 +19,13 @@ export const addCompany = async(req,res,next)=>{
         return next(new Error('This company email is used before',{cause:409}))
     }
     // number of employees
-    const [minNumber , maxNumber] = numberOfEmployee.split('-').map(Number)
-    if(minNumber > maxNumber){
-        return next(new Error('Invalid range Range must be from min to max',{cause:400}))
+    if(numberOfEmployeeFrom > numberOfEmployeeTo){
+        return next(new Error('Invalid range from must be smaller than to',{cause:400}))
     }
+    let numberOfEmployeeResult = `${numberOfEmployeeFrom}-${numberOfEmployeeTo}`
     // create new company
     const newCompany = await CompanyModel.create(
-        {companyEmail,numberOfEmployee,address,industry,description,companyName,companyHR:_id}
+        {companyEmail,numberOfEmployeeFrom,numberOfEmployeeTo,numberOfEmployee:numberOfEmployeeResult,address,industry,description,companyName,companyHR:_id}
     )
     if(!newCompany){
         return next(new Error('Failed to add company',{cause:400}))
@@ -40,7 +36,7 @@ export const addCompany = async(req,res,next)=>{
 
 export const updateCompany = async(req,res,next)=>{
     const {companyId} = req.params
-    const {companyName,description,companyEmail,industry,address,numberOfEmployee} = req.body
+    const {companyName,description,companyEmail,industry,address,numberOfEmployeeFrom, numberOfEmployeeTo} = req.body
     // check valid companyEmail
     if(companyEmail){
         const notValidCompanyEmail = await CompanyModel.findOne({companyEmail})
@@ -56,15 +52,17 @@ export const updateCompany = async(req,res,next)=>{
         }
     }
     // number of employees
-    if(numberOfEmployee){
-        const [minNumber , maxNumber] = numberOfEmployee.split('-').map(Number)
-        if(minNumber > maxNumber){
-            return next(new Error('Invalid range Range must be from min to max',{cause:400}))
+    let {numberOfEmployee} = req.thisCompany
+    if(numberOfEmployeeFrom||numberOfEmployeeTo){
+        const [from , to] = numberOfEmployee.split('-').map(Number)
+        if(numberOfEmployeeFrom > to || numberOfEmployeeTo< from){
+            return next(new Error('This range is not valid',{cause:400}))
         }
+        numberOfEmployee = `${numberOfEmployeeFrom||from}-${numberOfEmployeeTo||to}`
     }
     // update company data
     const updateData = await CompanyModel.findByIdAndUpdate(companyId ,
-        {companyName,description,companyEmail,industry,address,numberOfEmployee},
+        {companyName,description,companyEmail,industry,address,numberOfEmployeeTo,numberOfEmployeeFrom,numberOfEmployee},
         {new: true}
     )
     if(!updateData){
@@ -88,8 +86,8 @@ export const deleteCompany = async(req,res,next)=>{
 export const getCompanyData = async(req,res,next)=>{
     const {companyId} = req.params
     // check the company found or not
-    const foundCompany = await CompanyModel.findById(companyId)
-    .select( '-_id companyName description industry address numberOfEmployee companyEmail')
+    const foundCompany = await CompanyModel.findById(companyId,'_id companyName description industry address numberOfEmployee companyEmail')
+    .populate('jobs','-_id jobTitle jobLocation workingTime seniorityLevel technicalSkills softSkills')
     if(!foundCompany){
         return next(new Error('This company not found',{cause:404}))
     }
