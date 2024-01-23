@@ -22,6 +22,11 @@ export const addCompany = async(req,res,next)=>{
     if(checkDuplicateCompanyEmail){
         return next(new Error('This company email is used before',{cause:409}))
     }
+    // number of employees
+    const [minNumber , maxNumber] = numberOfEmployee.split('-').map(Number)
+    if(minNumber > maxNumber){
+        return next(new Error('Invalid range Range must be from min to max',{cause:400}))
+    }
     // create new company
     const newCompany = await CompanyModel.create(
         {companyEmail,numberOfEmployee,address,industry,description,companyName,companyHR:_id}
@@ -48,6 +53,13 @@ export const updateCompany = async(req,res,next)=>{
         const notValidCompanyName = await CompanyModel.findOne({companyName})
         if(notValidCompanyName){
             return next(new Error('Invalid company name',{cause:409}))
+        }
+    }
+    // number of employees
+    if(numberOfEmployee){
+        const [minNumber , maxNumber] = numberOfEmployee.split('-').map(Number)
+        if(minNumber > maxNumber){
+            return next(new Error('Invalid range Range must be from min to max',{cause:400}))
         }
     }
     // update company data

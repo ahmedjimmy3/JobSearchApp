@@ -22,7 +22,7 @@ export const loginSchema = {
         recoveryEmail: generalRules.anyString.email(),
         password: generalRules.anyStringRequired.pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
     }),
-    headers: generalRules.headersHiddenWithToken,
+    headers: generalRules.headersHidden,
 }
 
 export const deleteAccountSchema = {
