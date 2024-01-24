@@ -4,8 +4,8 @@ import userStatus from '../../src/utils/user.status.js'
 
 const userSchema = new Schema (
     {
-        firstName:{type:String , required:true},
-        lastName:{type:String , required:true},
+        firstName:{type:String , required:true , trim:true},
+        lastName:{type:String , required:true , trim:true},
         username:{type:String },
         email:{type:String , unique:true , required:true},
         password:{type:String , required:true},

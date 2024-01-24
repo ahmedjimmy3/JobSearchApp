@@ -6,17 +6,8 @@ import ApplicationModel from "../../../db/models/application.model.js"
 export const addJob = async(req,res,next)=>{
     // get data from body
     const {_id} = req.authUser
+    const {companyId} = req.params
     const {jobTitle,jobLocation,workingTime,seniorityLevel,technicalSkills,softSkills}=req.body
-    // check all fields
-    if(!jobLocation||!jobTitle||!workingTime||!seniorityLevel||!technicalSkills||!softSkills){
-        return next(new Error('All this fields are required',{cause:400}))
-    }
-    // get companyId 
-    const company = await CompanyModel.findOne({companyHR:_id})
-    if(!company){
-        return next(new Error('Company not found'))
-    }
-    const companyId = company._id
     // create job
     const newJob = await JobModel.create(
         {jobTitle,jobLocation,workingTime,seniorityLevel,technicalSkills,softSkills,addedBy:_id,companyId}
@@ -32,9 +23,18 @@ export const updateJob = async(req,res,next)=>{
     // get data from body
     const {jobId} = req.params
     const {jobTitle,jobLocation,workingTime,seniorityLevel,technicalSkills,softSkills} = req.body
+    const job = await JobModel.findById(jobId)
+    let techSkills = job.technicalSkills
+    let soSkills = job.softSkills
+    if(technicalSkills){
+        techSkills = [...techSkills,...technicalSkills]
+    }
+    if(softSkills){
+        soSkills = [...soSkills,...softSkills]
+    }
     // apply update
     const jobModification = await JobModel.findByIdAndUpdate(jobId,
-        {jobTitle,jobLocation,workingTime,seniorityLevel,technicalSkills,softSkills},
+        {jobTitle,jobLocation,workingTime,seniorityLevel,technicalSkills:techSkills,softSkills:soSkills},
         {new:true}
     )
     if(!jobModification){

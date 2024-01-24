@@ -17,7 +17,7 @@ const checkCompanyOwner = ()=>{
             const job = await JobModel.findById(jobId)
             if(!job){ return next(new Error('This job not found',{cause:404}))}
             if(companyFound._id.toString() != job.companyId.toString()){
-                return next(new Error('You are not authorized to access this job applications!!',{cause:401}))
+                return next(new Error('This job or application does not found here',{cause:401}))
             }
         }
         req.thisCompany = companyFound

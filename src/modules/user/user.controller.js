@@ -20,12 +20,12 @@ export const signUp = async(req,res,next)=>{
         return next(new Error('Email or mobileNumber already used before.!!', {cause:409}))
     }
     //get username
-    const username = firstName.toLowerCase()+lastName.toLowerCase() 
+    const username = firstName+'-'+lastName
     //hash password
     const hashedPassword = bcrypt.hashSync(password , +process.env.SAULT_ROUNDS)
     // apply format of DOB
-    const dobMoment = moment(DOB,'YYYY-M-D')
-    const formatDob = dobMoment.format('YYYY-M-D')
+    const dobMoment = moment(DOB,'YYYY-MM-DD')
+    const formatDob = dobMoment.format('YYYY-MM-DD')
     // create new user in db
     const newUser = await UserModel.create({
         firstName,lastName,email,password:hashedPassword,recoveryEmail,DOB:formatDob,mobileNumber,username,role
@@ -91,6 +91,7 @@ export const updateAccount = async(req,res,next)=>{
     // ge data from body
     const {_id} = req.authUser
     const {email , mobileNumber , recoveryEmail , DOB , lastName , firstName} = req.body
+    const userOldData = await UserModel.findById(_id)
     // check if email or mobileNumber used before
     if(email){
         const checkEmail = await UserModel.findOne({email})
@@ -106,12 +107,17 @@ export const updateAccount = async(req,res,next)=>{
     }
     let formatDOB
     if(DOB){
-        const DOBmoment = moment(DOB , 'YYYY-M-D')
-        formatDOB = DOBmoment.format('YYYY-M-D')
+        const DOBmoment = moment(DOB , 'YYYY-MM-DD')
+        formatDOB = DOBmoment.format('YYYY-MM-DD')
+    }
+    let username
+    if(firstName||lastName){
+        const [oldFirstName , oldLastName ] = userOldData.username.split('-')
+        username = `${firstName||oldFirstName}-${lastName||oldLastName}`
     }
     // update data
     const updatedData = await UserModel.findByIdAndUpdate({_id},{
-            email , mobileNumber , recoveryEmail , DOB:formatDOB , lastName , firstName 
+            email , mobileNumber , recoveryEmail , DOB:formatDOB , lastName , firstName ,username
         } , {new:true}
     )
     if(!updatedData){
