@@ -13,8 +13,8 @@ export const addJobSchema = {
         seniorityLevel: generalRules.anyStringRequired
         .valid(seniorityLevels.TEAM_LEAD,seniorityLevels.SENIOR,seniorityLevels.MID_LEVEL,seniorityLevels.JUNIOR,seniorityLevels.CTO)
         .insensitive(),
-        technicalSkills: Joi.array().required(),
-        softSkills: Joi.array().required()
+        technicalSkills: Joi.array().items(Joi.string()).required(),
+        softSkills: Joi.array().items(Joi.string()).required()
     }),
     headers: generalRules.headersHiddenWithToken,
     params: Joi.object({
@@ -31,8 +31,8 @@ export const updateJobSchema = {
         seniorityLevel: generalRules.anyString
         .valid(seniorityLevels.TEAM_LEAD,seniorityLevels.SENIOR,seniorityLevels.MID_LEVEL,seniorityLevels.JUNIOR,seniorityLevels.CTO)
         .insensitive(),
-        technicalSkills: Joi.array(),
-        softSkills: Joi.array()
+        technicalSkills: Joi.array().items(Joi.string()),
+        softSkills: Joi.array().items(Joi.string())
     }),
     headers: generalRules.headersHiddenWithToken,
     params: Joi.object({
@@ -76,8 +76,8 @@ export const filterJobsSchema = {
 
 export const applyJobSchema = {
     body: Joi.object({
-        userTechSkills : Joi.array(),
-        userSoftSkills : Joi.array(),
+        userTechSkills : Joi.array().items(Joi.string()),
+        userSoftSkills : Joi.array().items(Joi.string()),
         Resume: Joi.boolean().valid(true)
     }),
     params:Joi.object({
